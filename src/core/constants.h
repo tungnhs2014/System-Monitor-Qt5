@@ -65,9 +65,11 @@ const int CIRCULAR_PROGRESS_SIZE = 60;         // Circular progress diameter
 const QString PROC_STAT = "/proc/stat";
 const QString PROC_MEMINFO = "/proc/meminfo";
 const QString PROC_CPUINFO = "/proc/cpuinfo";
+const QString PROC_VERSION = "/proc/version";
 const QString PROC_NET_DEV = "/proc/net/dev";
 const QString PROC_MOUNTS = "/proc/mounts";
 const QString PROC_UPTIME = "/proc/uptime";
+const QString PROC_LOADAVG = "/proc/loadavg";
 const QString THERMAL_ZONE_PATH = "/sys/class/thermal/thermal_zone0/temp";
 const QString CPUFREQ_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq";
 

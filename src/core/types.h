@@ -27,7 +27,7 @@ enum class MertricStatus {
 /**
  * @brief Dashboard card types for navigation
  */
-enum class MertricStatus {
+enum class CardType {
     CPU = 0,        // CPU monitoring card
     GPU,            // CPU monitoring card
     Memory,         // RAM monitoring card
@@ -39,7 +39,7 @@ enum class MertricStatus {
 /**
  * @brief Alert serity levels
  */
-enum class MertricStatus {
+enum class AlertSeverity {
     Info = 0,       // Informational alerts
     Warning,        // Warning level alerts
     Critical,       // Critical system alerts

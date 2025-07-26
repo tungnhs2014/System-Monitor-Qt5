@@ -248,17 +248,140 @@ double SystemUtils::getCPUTemperature()
     return tempC;
 }
 
+// ===================================================================
+// MEMORY INFORMATION (Pi 3B+ 1GB RAM)
+// ===================================================================
+
+qint64 SystemUtils::getTotalMemory()
+{
+    QString value = extractValueFromProcFile(PROC_MEMINFO, "MemTotal");
+    return parseMemoryLine("MemTotal: " + value);
+}
+
+qint64 SystemUtils::getAvailableMemory()
+{
+    QString value = extractValueFromProcFile(PROC_MEMINFO, "MemAvailable");
+    return parseMemoryLine("MemAvailable: " + value);
+}
+
+qint64 SystemUtils::getFreeMemory()
+{
+    QString value = extractValueFromProcFile(PROC_MEMINFO, "MemFree");
+    return parseMemoryLine("MemFree: " + value);
+}
+
+qint64 SystemUtils::getBufferMemory()
+{
+    QString value = extractValueFromProcFile(PROC_MEMINFO, "Buffers");
+    return parseMemoryLine("Buffers: " + value);
+}
+
+qint64 SystemUtils::getCacheMemory()
+{
+    QString value = extractValueFromProcFile(PROC_MEMINFO, "Cached");
+    return parseMemoryLine("Cached: " + value);
+}
+
+// ===================================================================
+// FORMAT UTILITIES
+// ===================================================================
+
+QString SystemUtils::formatBytes(qint64 bytes)
+{
+    if (bytes < 0) {
+        return "0 B";
+    }
+
+    const QStringList units = {"B", "KB", "MB", "GB", "TB"};
+    double size = bytes;
+    int unitIndex = 0;
+
+    while (size >= 1024.0 && unitIndex < units.size() - 1) {
+        size /= 1024.0;
+        unitIndex++;
+    }
+
+    return QString("%1 %2").arg(size, 0, 'f', (unitIndex == 0) ? 0 : 1).arg(units[unitIndex]);
+}
+
 QString SystemUtils::formatUptime(qint64 seconds)
 {
+    if (seconds < 0) {
+        return "0s";
+    }
 
+    qint64 days = seconds / 86400;
+    qint64 hours = (seconds % 86400) / 3600;
+    qint64 minutes = (seconds % 3600) / 60;
+    qint64 secs = seconds % 60;
+
+    QStringList parts;
+
+    if (days > 0) {
+        parts.append(QString("%1d").arg(days));
+    }
+    if (hours > 0) {
+        parts.append(QString("%1h").arg(hours));
+    }
+    if (minutes > 0) {
+        parts.append(QString("%1m").arg(minutes));
+    }
+    if (secs > 0 || parts.isEmpty()) {
+        parts.append(QString("%1s").arg(secs));
+    }
+
+    return parts.join(" ");
 }
+
+QString SystemUtils::formatTemperature(double celsius)
+{
+    return QString("%1°C").arg(celsius, 0, 'f', 1);
+}
+
+// ===================================================================
+// VALIDATION UTILITIES
+// ===================================================================
 
 bool SystemUtils::isValidTemperature(double celsius)
 {
-
+    // Reasonable temperature range for Pi 3B+: -40°C to 150°C
+    return celsius >= -40.0 && celsius <= 150.0;
 }
 
-QString SystemUtils::extractValueFromProcFile(const QString &filePath, const QString &key)
-{
+// ===================================================================
+// INTERNAL HELPER METHODS
+// ===================================================================
 
+QString SystemUtils::extractValueFromProcFile(const QString& filePath, const QString& key)
+{
+    QStringList lines = readFileLines(filePath);
+
+    for (const QString& line: lines) {
+        if (line.startsWith(key, Qt::CaseInsensitive)) {
+            // Find colon separator
+            int colonIndex = line.indexOf(':');
+            if (colonIndex > 0) {
+                return line.mid(colonIndex + 1).trimmed();
+            }
+        }
+    }
+
+    return QString();
+}
+
+qint64 SystemUtils::parseMemoryLine(const QString &line)
+{
+    // Parse lines like "MemTotal:    1000000 kB"
+    QRegularExpression regex("(\\d+)\\s*kB");
+    QRegularExpressionMatch match = regex.match(line);
+
+    if (match.hasMatch()) {
+        bool ok;
+        qint64 kilobytes = parseInt64(match.captured(1), &ok);
+        if (ok) {
+            return kilobytes * 1024; // Convert kB to bytes
+        }
+    }
+
+    return 0;
 }

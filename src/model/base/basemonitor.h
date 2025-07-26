@@ -12,8 +12,8 @@
 #include <QTimer>
 #include <QMutex>
 #include <QDateTime>
-#include "../../core/constants.h"
-#include "../../core/types.h"
+#include "core/constants.h"
+#include "core/types.h"
 
 /**
  * @brief Abstract base monitor using Template method pattern

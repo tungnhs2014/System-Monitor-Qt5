@@ -342,6 +342,11 @@ QString SystemUtils::formatTemperature(double celsius)
 // VALIDATION UTILITIES
 // ===================================================================
 
+bool SystemUtils::isValidPercentage(double value)
+{
+    return value >= 0.0 && value <= 100.0;
+}
+
 bool SystemUtils::isValidTemperature(double celsius)
 {
     // Reasonable temperature range for Pi 3B+: -40°C to 150°C

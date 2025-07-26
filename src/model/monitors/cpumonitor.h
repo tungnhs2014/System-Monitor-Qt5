@@ -16,7 +16,7 @@ public:
     void setHistorySize(int size);
 
 signals:
-    void CPUDataUpdated(const CPUData& data);
+    void cpuDataUpdated(const CPUData& data);
     void temperatureWarning(double temp);
     void temperatureCritical(double temp);
     void usageWarning(double usage);

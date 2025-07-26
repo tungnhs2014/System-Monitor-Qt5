@@ -7,7 +7,7 @@
 #define TEST_SYSTEMUTILS_H
 
 #include <QObject>
-#include <QtTest>
+#include <QTest>
 
 class TestSystemUtils : public QObject
 {

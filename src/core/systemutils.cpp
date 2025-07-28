@@ -283,6 +283,89 @@ qint64 SystemUtils::getCacheMemory()
 }
 
 // ===================================================================
+// NETWORK INFORMATION
+// ===================================================================
+
+QStringList SystemUtils::getNetworkInterfaces()
+{
+    QStringList interfaces;
+    QStringList lines = readFileLines(PROC_NET_DEV);
+
+    // Skip header lines (first 2 lines)
+    for (int i = 2; i < lines.size(); ++i) {
+        QString line = lines[i].trimmed();
+        if (line.isEmpty()) continue;
+
+        // Extract interface name (before first colon)
+        int colonIndex = line.indexOf(':');
+        if (colonIndex > 0) {
+            QString interfaceName = line.left(colonIndex).trimmed();
+            interfaces.append(interfaceName);
+        }
+    }
+
+    return interfaces;
+}
+
+QString SystemUtils::getActiveNetworkInterface()
+{
+    QStringList interfaces = getNetworkInterfaces();
+
+    // Prefer common interfaces in order
+    QStringList preferredOrder = {"eth0", "wlan0", "enp0s3", "wlp2s0"};
+
+    for (const QString& preferred : preferredOrder) {
+        if (interfaces.contains(preferred)) {
+            return preferred;
+        }
+    }
+
+    // Return first non-loopback interface
+    for (const QString& iface : interfaces) {
+        if (iface != "lo") {
+            return iface;
+        }
+    }
+
+    return interfaces.isEmpty() ?  "unknown" : interfaces.first();
+}
+
+// ===================================================================
+// STORAGE INFORMATION
+// ===================================================================
+
+qint64 SystemUtils::getStorageTotal(const QString &path)
+{
+    QStorageInfo storage(path);
+    if (!storage.isValid()) {
+        qWarning() << "Invalid storage path: " << path;
+        return 0;
+    }
+
+    return storage.bytesTotal();
+}
+
+qint64 SystemUtils::getStorageUsed(const QString &path)
+{
+    QStorageInfo storage(path);
+    if (!storage.isValid()) {
+        return 0;
+    }
+
+    return storage.bytesTotal() - storage.bytesAvailable();
+}
+
+qint64 SystemUtils::getStorageAvailable(const QString &path)
+{
+    QStorageInfo storage(path);
+    if (!storage.isValid()) {
+        return 0;
+    }
+
+    return storage.bytesAvailable();
+}
+
+// ===================================================================
 // FORMAT UTILITIES
 // ===================================================================
 
@@ -333,6 +416,11 @@ QString SystemUtils::formatUptime(qint64 seconds)
     return parts.join(" ");
 }
 
+QString SystemUtils::formatPercentage(double percentage)
+{
+    return QString("%1%").arg(percentage, 0, 'f', 1);
+}
+
 QString SystemUtils::formatTemperature(double celsius)
 {
     return QString("%1°C").arg(celsius, 0, 'f', 1);
@@ -351,6 +439,27 @@ bool SystemUtils::isValidTemperature(double celsius)
 {
     // Reasonable temperature range for Pi 3B+: -40°C to 150°C
     return celsius >= -40.0 && celsius <= 150.0;
+}
+
+// ===================================================================
+// PERFORMANCE UTILITIES
+// ===================================================================
+
+double SystemUtils::calculateCPUUsage(qint64 totalTime, qint64 idleTime, qint64 lastTotalTime, qint64 lastIdleTime)
+{
+    qint64 totalDiff = totalTime - lastTotalTime;
+    qint64 idleDiff = idleTime - lastIdleTime;
+
+    if (totalDiff <= 0) {
+        return 0.0;
+    }
+
+    double usage = (1.0 - static_cast<double>(idleDiff) / totalDiff) * 100.0;
+
+    // Clamp to valid percentage range
+    usage = qMax(0.0, qMin(100.0, usage));
+
+    return usage;
 }
 
 // ===================================================================

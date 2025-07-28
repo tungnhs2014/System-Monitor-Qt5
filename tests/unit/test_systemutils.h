@@ -32,23 +32,23 @@ private slots:
     void testGetTotalMemory();
     void testGetAvailableMemory();
 
-    // // Network tests
-    // void testGetNetworkInterfaces();
-    // void testGetActiveNetworkInterface();
+    // Network tests
+    void testGetNetworkInterfaces();
+    void testGetActiveNetworkInterface();
 
-    // // Storage tests
-    // void testGetStorageTotal();
-    // void testGetStorageUsed();
+    // Storage tests
+    void testGetStorageTotal();
+    void testGetStorageUsed();
 
-    // // Format tests
-    // void testFormatBytes();
-    // void testFormatUptime();
-    // void testFormatPercentage();
-    // void testFormatTemperature();
+    // Format tests
+    void testFormatBytes();
+    void testFormatUptime();
+    void testFormatPercentage();
+    void testFormatTemperature();
 
-    // // Validation tests
-    // void testIsValidPercentage();
-    // void testIsValidTemperature();
+    // Validation tests
+    void testIsValidPercentage();
+    void testIsValidTemperature();
 };
 
 #endif // TEST_SYSTEMUTILS_H

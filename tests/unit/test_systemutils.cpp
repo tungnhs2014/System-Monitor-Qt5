@@ -108,6 +108,91 @@ void TestSystemUtils::testGetAvailableMemory()
     qDebug() << "Available RAM:" << SystemUtils::formatBytes(available);
 }
 
+// Network tests
+void TestSystemUtils::testGetNetworkInterfaces()
+{
+    QStringList interfaces = SystemUtils::getNetworkInterfaces();
+    QVERIFY(!interfaces.isEmpty());
+    QVERIFY(interfaces.contains("lo")); // Should have loopback
+    qDebug() << "Network interfaces:" << interfaces;
+}
 
+void TestSystemUtils::testGetActiveNetworkInterface()
+{
+    QString active = SystemUtils::getActiveNetworkInterface();
+    QVERIFY(!active.isEmpty());
+    QVERIFY(active != "unknown");
+    qDebug() << "Active interface:" << active;
+}
 
+// Storage test
+void TestSystemUtils::testGetStorageTotal()
+{
+    qint64 total = SystemUtils::getStorageTotal("/");
+    QVERIFY(total > 0);
+    qDebug() << "Storage total:" << SystemUtils::formatBytes(total);
+}
+
+void TestSystemUtils::testGetStorageUsed()
+{
+    qint64 total = SystemUtils::getStorageTotal("/");
+    qint64 used = SystemUtils::getStorageUsed("/");
+
+    QVERIFY(used >= 0);
+    QVERIFY(used <= total);
+    qDebug() << "Storage used:" << SystemUtils::formatBytes(used);
+}
+
+// Format tests
+void TestSystemUtils::testFormatBytes()
+{
+    QCOMPARE(SystemUtils::formatBytes(0), "0 B");
+    QCOMPARE(SystemUtils::formatBytes(1024), "1.0 KB");
+    QCOMPARE(SystemUtils::formatBytes(1024 * 1024), "1.0 MB");
+    QCOMPARE(SystemUtils::formatBytes(1024 * 1024 * 1024), "1.0 GB");
+}
+
+void TestSystemUtils::testFormatUptime()
+{
+    QCOMPARE(SystemUtils::formatUptime(0), "0s");
+    QCOMPARE(SystemUtils::formatUptime(60), "1m");
+    QCOMPARE(SystemUtils::formatUptime(3600), "1h");
+    QCOMPARE(SystemUtils::formatUptime(86400), "1d");
+    QCOMPARE(SystemUtils::formatUptime(90061), "1d 1h 1m 1s");
+}
+
+void TestSystemUtils::testFormatPercentage()
+{
+    QCOMPARE(SystemUtils::formatPercentage(0.0), "0.0%");
+    QCOMPARE(SystemUtils::formatPercentage(50.5), "50.5%");
+    QCOMPARE(SystemUtils::formatPercentage(100.0), "100.0%");
+}
+
+void TestSystemUtils::testFormatTemperature()
+{
+    QCOMPARE(SystemUtils::formatTemperature(0.0), "0.0°C");
+    QCOMPARE(SystemUtils::formatTemperature(25.5), "25.5°C");
+    QCOMPARE(SystemUtils::formatTemperature(100.0), "100.0°C");
+}
+
+// Validation tests
+void TestSystemUtils::testIsValidPercentage()
+{
+    QVERIFY(SystemUtils::isValidPercentage(0.0));
+    QVERIFY(SystemUtils::isValidPercentage(50.0));
+    QVERIFY(SystemUtils::isValidPercentage(100.0));
+
+    QVERIFY(!SystemUtils::isValidPercentage(-1.0));
+    QVERIFY(!SystemUtils::isValidPercentage(101.0));
+}
+
+void TestSystemUtils::testIsValidTemperature()
+{
+    QVERIFY(SystemUtils::isValidTemperature(0.0));
+    QVERIFY(SystemUtils::isValidTemperature(25.0));
+    QVERIFY(SystemUtils::isValidTemperature(100.0));
+
+    QVERIFY(!SystemUtils::isValidTemperature(-50.0));
+    QVERIFY(!SystemUtils::isValidTemperature(200.0));
+}
 

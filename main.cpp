@@ -32,6 +32,40 @@ int main(int argc, char *argv[])
     qDebug() << "Frequency: " << SystemUtils::getCPUFrequency();
     qDebug() << "Temperature: " << SystemUtils::formatTemperature(SystemUtils::getCPUTemperature());
 
+    // Memory Info
+    qDebug() << "---MEMORY INFO ---";
+    qint64 totalRAM = SystemUtils::getTotalMemory();
+    qint64 availableRAM = SystemUtils::getAvailableMemory();
+
+    qDebug() << "Total RAM: " << SystemUtils::formatBytes(totalRAM);
+    qDebug() << "Available RAM: " << SystemUtils::formatBytes(availableRAM);
+
+    if (totalRAM > 0) {
+        double usagePercent = ((double)(totalRAM - availableRAM) / totalRAM) * 100.0;
+        qDebug() << "Memory Usage: " << SystemUtils::formatPercentage(usagePercent);
+    }
+
+    // Network Info
+    qDebug() << "---NETWORK INFO ---";
+    QStringList interfaces = SystemUtils::getNetworkInterfaces();
+    qDebug() << "Interfaces: " << interfaces.join(", ");
+    qDebug() << "Active: " << SystemUtils::getActiveNetworkInterface();
+
+    // Storage info
+    qDebug() << "---STORAGE INFO ---";
+    qint64 total = SystemUtils::getStorageTotal("/");
+    qint64 used = SystemUtils::getStorageUsed("/");
+    qint64 available = SystemUtils::getStorageAvailable("/");
+
+    if (total > 0) {
+        double usagePercent = ((double)used / total) * 100.0;
+        qDebug() << "root (/): " << SystemUtils::formatBytes(total)
+                 << " total, "<< SystemUtils::formatBytes(used)
+                 << " used (" << SystemUtils::formatPercentage(usagePercent) << ") "
+                 << SystemUtils::formatBytes(available);
+    }
+
+    qDebug() << "=== Demo Complete";
 
     return app.exec();
 }

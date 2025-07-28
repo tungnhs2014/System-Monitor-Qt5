@@ -71,7 +71,21 @@ void TestCPUMonitor::testStartStop()
 
 void TestCPUMonitor::testDataCollection()
 {
+    QSignalSpy dataSpy(m_monitor.get(), &CPUMonitor::cpuDataUpdated);
 
+    m_monitor->setUpdateInterval(500);    // Fast for testing
+    m_monitor->startMonitoring();
+
+    // Wait for at least 2 updates
+    QVERIFY(dataSpy.wait(2000));
+    QVERIFY(dataSpy.count() >= 1);
+
+    // Check data validity
+    CPUData data = m_monitor->getCurrentData();
+    QVERIFY(data.isValid());
+    QVERIFY(data.totalUsage >= 0.0 && data.totalUsage <= 100.0);
+    QVERIFY(data.temperature >= 0.0);
+    QVERIFY(data.averageFrequency > 0.0);
 }
 
 void TestCPUMonitor::testDataValidation()

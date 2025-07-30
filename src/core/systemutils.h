@@ -260,9 +260,6 @@ public:
     static double calculateCPUUsage(qint64 totalTime, qint64 idleTime,
                                     qint64 lastTotalTime, qint64 lastIdleTime);
 
-private:
-    SystemUtils() = delete; // Static class only
-
     // ===================================================================
     // INTERNAL HELPER METHODS
     // ===================================================================
@@ -282,6 +279,9 @@ private:
      * @return Memory value in bytes
      */
     static qint64 parseMemoryLine(const QString& line);
+
+private:
+    SystemUtils() = delete; // Static class only
 };
 
 #endif // SYSTEMUTILS_H

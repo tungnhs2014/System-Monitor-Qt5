@@ -1,71 +1,114 @@
-
 /**
  * @file main.cpp
  * @brief SystemMonitor
  * @author TungNHS
  * @version 1.0.0
  */
-
 #include <QCoreApplication>
+#include <QTimer>
 #include <QDebug>
-
-#include "core/constants.h"
+#include <memory>
 #include "core/systemutils.h"
+#include "core/constants.h"
+#include "model/managers/datamanager.h"
+#include "model/managers/alertmanager.h"
+
+class SystemMonitorDemo
+{
+public:
+    SystemMonitorDemo() {
+        m_dataManager = std::make_unique<DataManager>();
+        m_demoTimer = std::make_unique<QTimer>();
+        m_updateCount = 0;
+
+        // Use lambda functions instead of slots
+        QObject::connect(m_dataManager.get(), &DataManager::systemDataUpdated,
+                         [this](const SystemOverview& data) {
+                             this->onSystemUpdate(data);
+                         });
+
+        QObject::connect(m_dataManager->getAlertManager(), &AlertManager::alertAdded,
+                         [this](const AlertData& alert) {
+                             this->onAlert(alert);
+                         });
+
+        QObject::connect(m_demoTimer.get(), &QTimer::timeout,
+                         [this]() {
+                             this->checkExit();
+                         });
+
+        m_demoTimer->start(1000); // Check every second
+    }
+
+    ~SystemMonitorDemo() {
+        if (m_dataManager) {
+            m_dataManager->stop();
+        }
+    }
+
+    void start() {
+        printHeader();
+        m_dataManager->initialize();
+        m_dataManager->start();
+    }
+
+private:
+    void onSystemUpdate(const SystemOverview& data) {
+        m_updateCount++;
+        qDebug() << QString("[%1] CPU:%2% Temp:%3°C | MEM:%4% Used:%5")
+                        .arg(m_updateCount, 2)
+                        .arg(data.cpu.totalUsage, 5, 'f', 1)
+                        .arg(data.cpu.temperature, 4, 'f', 1)
+                        .arg(data.memory.usagePercentage, 5, 'f', 1)
+                        .arg(SystemUtils::formatBytes(data.memory.usedRAM));
+    }
+
+    void onAlert(const AlertData& alert) {
+        QString level = (alert.severity == AlertSeverity::Critical) ? "CRITICAL" : "WARNING";
+        qDebug() << QString("%1: %2").arg(level).arg(alert.message);
+    }
+
+    void checkExit() {
+        if (m_updateCount >= 20) { // Demo for 20 updates
+            qDebug() << "\nDemo completed successfully!";
+            QCoreApplication::quit();
+        }
+    }
+
+    void printHeader() {
+        qDebug() << "=== SystemMonitor Demo ===";
+        qDebug() << "App:" << APP_NAME << "v" << APP_VERSION;
+        qDebug() << "";
+
+        // Phase 1 - System Info
+        qDebug() << "--- SYSTEM INFO (Phase 1) ---";
+        qDebug() << "Hostname:" << SystemUtils::getHostname();
+        qDebug() << "Kernel:" << SystemUtils::getKernelVersion();
+        qDebug() << "CPU Model:" << SystemUtils::getCPUModel();
+        qDebug() << "CPU Cores:" << SystemUtils::getCPUCoreCount();
+        qDebug() << "Total RAM:" << SystemUtils::formatBytes(SystemUtils::getTotalMemory());
+        qDebug() << "Uptime:" << SystemUtils::getUptime();
+        qDebug() << "";
+        qDebug() << "--- REAL-TIME MONITORING (Phase 2) ---";
+    }
+
+    std::unique_ptr<DataManager> m_dataManager;
+    std::unique_ptr<QTimer> m_demoTimer;
+    int m_updateCount;
+};
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
 
-    qDebug() << "=== SystemMonitor Phase 1 Demo ===";
-    qDebug() << "Applicatin: " << APP_NAME << " v" << APP_VERSION;
+    // Register Qt metatypes
+    qRegisterMetaType<CPUData>("CPUData");
+    qRegisterMetaType<MemoryData>("MemoryData");
+    qRegisterMetaType<SystemOverview>("SystemOverview");
+    qRegisterMetaType<AlertData>("AlertData");
 
-    // System Info
-    qDebug() << "--- SYSTEM INFO ---";
-    qDebug() << "Hostname: " << SystemUtils::getHostname();
-    qDebug() << "Kernel: " << SystemUtils::getKernelVersion();
-    qDebug() << "Uptime: " << SystemUtils::getUptime();
-
-    // CPU Info
-    qDebug() << "--- CPU INFO ---";
-    qDebug() << "Cores: " << SystemUtils::getCPUCoreCount();
-    qDebug() << "Model: " << SystemUtils::getCPUModel();
-    qDebug() << "Frequency: " << SystemUtils::getCPUFrequency();
-    qDebug() << "Temperature: " << SystemUtils::formatTemperature(SystemUtils::getCPUTemperature());
-
-    // Memory Info
-    qDebug() << "---MEMORY INFO ---";
-    qint64 totalRAM = SystemUtils::getTotalMemory();
-    qint64 availableRAM = SystemUtils::getAvailableMemory();
-
-    qDebug() << "Total RAM: " << SystemUtils::formatBytes(totalRAM);
-    qDebug() << "Available RAM: " << SystemUtils::formatBytes(availableRAM);
-
-    if (totalRAM > 0) {
-        double usagePercent = ((double)(totalRAM - availableRAM) / totalRAM) * 100.0;
-        qDebug() << "Memory Usage: " << SystemUtils::formatPercentage(usagePercent);
-    }
-
-    // Network Info
-    qDebug() << "---NETWORK INFO ---";
-    QStringList interfaces = SystemUtils::getNetworkInterfaces();
-    qDebug() << "Interfaces: " << interfaces.join(", ");
-    qDebug() << "Active: " << SystemUtils::getActiveNetworkInterface();
-
-    // Storage info
-    qDebug() << "---STORAGE INFO ---";
-    qint64 total = SystemUtils::getStorageTotal("/");
-    qint64 used = SystemUtils::getStorageUsed("/");
-    qint64 available = SystemUtils::getStorageAvailable("/");
-
-    if (total > 0) {
-        double usagePercent = ((double)used / total) * 100.0;
-        qDebug() << "root (/): " << SystemUtils::formatBytes(total)
-                 << " total, "<< SystemUtils::formatBytes(used)
-                 << " used (" << SystemUtils::formatPercentage(usagePercent) << ") "
-                 << SystemUtils::formatBytes(available);
-    }
-
-    qDebug() << "=== Demo Complete";
+    SystemMonitorDemo demo;
+    demo.start();
 
     return app.exec();
 }

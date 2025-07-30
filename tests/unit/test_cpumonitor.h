@@ -28,6 +28,18 @@ private slots:
     void testDataCollection();
     void testDataValidation();
 
+    // CPU specific tests
+    void testUsageCalculation();
+    void testTemperatureReading();
+    void testCoreDataCollection();
+
+    // Signal tests
+    void testSignalEmission();
+    void testThresholdAlerts();
+
+    // Performance tests
+    void testUpdatePerformance();
+
 
 private:
     std::unique_ptr<CPUMonitor> m_monitor;

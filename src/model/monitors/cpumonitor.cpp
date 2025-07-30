@@ -28,6 +28,17 @@ CPUData CPUMonitor::getCurrentData() const
     return m_currentData;
 }
 
+QVector<CPUData> CPUMonitor::getHistory() const
+{
+    QMutexLocker locker(&m_dataMutex);
+    return m_history;
+}
+
+void CPUMonitor::setHistorySize(int size)
+{
+    m_maxHistorySize = qBound(10, size, 1000);
+}
+
 void CPUMonitor::collectData()
 {
     // Save previous state for delta calculation

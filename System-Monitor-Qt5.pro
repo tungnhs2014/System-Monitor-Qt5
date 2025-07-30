@@ -11,14 +11,20 @@ INCLUDEPATH += src/
 SOURCES += \
     src/core/systemutils.cpp \
     src/model/base/basemonitor.cpp \
-    src/model/monitors/cpumonitor.cpp
+    src/model/managers/alertmanager.cpp \
+    src/model/managers/datamanager.cpp \
+    src/model/monitors/cpumonitor.cpp \
+    src/model/monitors/memorymonitor.cpp
 
 HEADERS += \
     src/core/constants.h \
     src/core/types.h \
     src/core/systemutils.h \
     src/model/base/basemonitor.h \
-    src/model/monitors/cpumonitor.h
+    src/model/managers/alertmanager.h \
+    src/model/managers/datamanager.h \
+    src/model/monitors/cpumonitor.h \
+    src/model/monitors/memorymonitor.h
 
 # Test configuration
 CONFIG(test) {

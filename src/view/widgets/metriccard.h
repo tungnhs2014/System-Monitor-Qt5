@@ -138,7 +138,7 @@ public:
      * @brief Set card enabled/disabled state
      * @param enabled True if card is interactive
      */
-    void setEnabled(bool enabled) override;
+    void setEnabled(bool enabled);
 
 public slots:
     /**
@@ -174,7 +174,7 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
-    void enterEvent(QEvent* event) override;
+    void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     QSize sizeHint() const override;

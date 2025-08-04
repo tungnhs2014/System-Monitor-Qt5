@@ -14,7 +14,9 @@ SOURCES += \
     src/model/managers/alertmanager.cpp \
     src/model/managers/datamanager.cpp \
     src/model/monitors/cpumonitor.cpp \
-    src/model/monitors/memorymonitor.cpp
+    src/model/monitors/memorymonitor.cpp \
+    src/view/widgets/circularprogress.cpp \
+    src/view/widgets/metriccard.cpp
 
 HEADERS += \
     src/core/constants.h \
@@ -24,7 +26,9 @@ HEADERS += \
     src/model/managers/alertmanager.h \
     src/model/managers/datamanager.h \
     src/model/monitors/cpumonitor.h \
-    src/model/monitors/memorymonitor.h
+    src/model/monitors/memorymonitor.h \
+    src/view/widgets/circularprogress.h \
+    src/view/widgets/metriccard.h
 
 # Test configuration
 CONFIG(test) {
